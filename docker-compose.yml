@@ -1,0 +1,23 @@
+version: '3.1.1'
+services:
+  web:
+    build: tictactoe-frontend/
+    ports:
+      - "81:80"
+
+  app:
+    build: tictactoe/
+    ports:
+      - "8080:8080"
+
+
+# networks:
+#   frontend_network:
+#     driver: bridge
+#   backend_network:
+#     driver: bridge
+#     internal: true
+#     ipam:
+#       config:
+#         - subnet: 10.5.0.0/16
+#           gateway: 10.5.0.1
