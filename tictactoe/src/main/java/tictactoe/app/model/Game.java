@@ -7,7 +7,7 @@ import java.util.UUID;
 
 public class TicTacToe {
     private String gameId;
-    private String[][] board;
+    private String[] board;
     private String player1;
     private String player2;
     private String winner;
@@ -19,30 +19,38 @@ public class TicTacToe {
         this.player1 = player1;
         this.player2 = player2;
         this.turn = player1;
-        this.board = new String[3][3];
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                this.board[i][j] = " ";
-            }
+        this.board = new String[9];
+        for (int i = 0; i < 9; i++) {
+                this.board[i] = " ";
         }
         gameState = GameState.WAITING_FOR_PLAYER;
     }
 
 
     public void makeMove(String player, int move) {
-        int row = move / 3;
-        int col = move % 3;
-        if (Objects.equals(board[row][col], " ")) {
-            board[row][col] = Objects.equals(player, player1) ? "X" : "O";
+        if (Objects.equals(board[move], " ")) {
+            board[move] = Objects.equals(player, player1) ? "X" : "O";
             turn = player.equals(player1) ? player2 : player1;
             checkWinner();
             updateGameState();
         }
     }
 
+
+    private static int[][] winningMoves = {
+            {0, 1, 2}, // Top row
+            {3, 4, 5}, // Middle row
+            {6, 7, 8}, // Bottom row
+            {0, 3, 6}, // Left column
+            {1, 4, 7}, // Middle column
+            {2, 5, 8}, // Right column
+            {0, 4, 8}, // Diagonal from top-left to bottom-right
+            {2, 4, 6}  // Diagonal from top-right to bottom-left
+    };
+
     private void checkWinner() {
         for (int i = 0; i < 3; i++) {
-            if (Objects.equals(board[i][0], board[i][1]) && Objects.equals(board[i][0], board[i][2])) {
+            if (Objects.equals(board[i], board[i]) && Objects.equals(board[i][0], board[i][2])) {
                 if (!Objects.equals(board[i][0], " ")) {
                     setWinner(Objects.equals(board[i][0], player1) ? player1 : player2);
                     return;

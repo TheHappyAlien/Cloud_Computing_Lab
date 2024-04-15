@@ -1,7 +1,7 @@
 package tictactoe.app.model.dto;
 
 import tictactoe.app.enumeration.GameState;
-import tictactoe.app.model.TicTacToe;
+import tictactoe.app.model.Game;
 
 public class TicTacToeMessage implements Message {
     private String type;
@@ -19,7 +19,7 @@ public class TicTacToeMessage implements Message {
 
     public TicTacToeMessage() {}
 
-    public TicTacToeMessage(TicTacToe game) {
+    public TicTacToeMessage(Game game) {
         this.gameId = game.getGameId();
         this.player1 = game.getPlayer1();
         this.player2 = game.getPlayer2();
