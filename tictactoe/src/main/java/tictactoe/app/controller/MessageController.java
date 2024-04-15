@@ -1,23 +1,22 @@
 package tictactoe.app.controller;
 
-import org.springframework.messaging.simp.annotation.SendToUser;
-import tictactoe.app.enumeration.GameState;
-import tictactoe.app.manager.TicTacToeManager;
-import tictactoe.app.model.TicTacToe;
-import tictactoe.app.model.dto.*;
-import org.apache.commons.logging.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.event.EventListener;
 import org.springframework.messaging.handler.annotation.MessageMapping;
 import org.springframework.messaging.handler.annotation.Payload;
-import org.springframework.messaging.handler.annotation.SendTo;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
-import org.springframework.messaging.simp.stomp.StompHeaderAccessor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
-import java.util.Objects;
+import tictactoe.app.enumeration.GameState;
+import tictactoe.app.manager.TicTacToeManager;
+import tictactoe.app.model.Game;
+import tictactoe.app.model.dto.ErrorMessage;
+import tictactoe.app.model.dto.GameMessage;
+import tictactoe.app.model.dto.MoveMessage;
+import tictactoe.app.model.dto.NameChangeMessage;
+import tictactoe.app.model.dto.NameChangedMessage;
+import tictactoe.app.model.dto.PlayerMessage;
 
 @Controller
 public class MessageController {
@@ -27,109 +26,105 @@ public class MessageController {
 
     private final TicTacToeManager ticTacToeManager = new TicTacToeManager();
 
-    private final String GAME_ENDPOINT = "/topic/game.";
+    private final String GAME_ENDPOINT = "/game";
+    private final String USER_ENDPOINT = "/user";
 
-    @MessageMapping("/game.join")
-    @SendTo("/user/state")
-    public TicTacToeMessage joinGame(@Payload JoinMessage message) {
-        TicTacToe game = ticTacToeManager.joinGame(message.getPlayer());
-        if (game == null || game.getPlayer1() == null) {
-            TicTacToeMessage errorMessage = new TicTacToeMessage();
+    @MessageMapping("/join")
+    public void joinGame(@Payload String playerId) {
+        Game game = ticTacToeManager.joinGame(playerId);
+        if (game == null || game.getPlayer1Id() == null) {
+            ErrorMessage errorMessage = new ErrorMessage();
             errorMessage.setType("error");
             errorMessage.setContent("Something went wrong.");
-            return errorMessage;
+            messagingTemplate.convertAndSend(USER_ENDPOINT +  playerId, errorMessage);
         }
 
-        TicTacToeMessage gameMessage = gameToMessage(game);
-        gameMessage.setSender(message.getPlayer());
-       if (game.getPlayer2() == null){
-            gameMessage.setType("game.created");
-        } else  {
-            gameMessage.setType("game.joined");
-        }
+        GameMessage gameMessage = gameToMessage(game);
+        gameMessage.setType("joined");
 
-        return gameMessage;
+
+        messagingTemplate.convertAndSend(USER_ENDPOINT +  game.getPlayer1Id(), gameMessage);
+        messagingTemplate.convertAndSend(USER_ENDPOINT +  game.getPlayer2Id(), gameMessage);
     }
 
-    @MessageMapping("/game.refreshAfterReload")
-    @SendTo("/user/state")
-    public TicTacToeMessage refresh(@Payload JoinMessage message) {
-        TicTacToe game = ticTacToeManager.getGameByPlayer(message.getPlayer());
-        if (game == null){
-            return null;
-        }
-        TicTacToeMessage gameMessage = gameToMessage(game);
+    // @MessageMapping("/refresh")
+    // @SendTo("/user")
+    // public GameMessage refresh(@Payload JoinMessage message) {
+    //     Game game = ticTacToeManager.getGameByPlayer(message.getPlayerId());
+    //     if (game == null){
+    //         return null;
+    //     }
+    //     GameMessage gameMessage = gameToMessage(game);
 
-        gameMessage.setType("game.refreshAfterReload");
-        gameMessage.setSender("message.getPlayer()");
-        return gameMessage;
-    }
+    //     gameMessage.setType("game.refreshAfterReload");
+    //     gameMessage.setSender("message.getPlayer()");
+    //     return gameMessage;
+    // }
 
-    @MessageMapping("/user.changeName")
-    @SendTo("/user/state")
+    @MessageMapping("/changeName")
     public NameChangedMessage changeName(@Payload NameChangeMessage message) {
-        TicTacToe game = ticTacToeManager.getGameByPlayer(message.getOldName());
+        Game game = ticTacToeManager.getGameByPlayer(message.getPlayerId());
         NameChangedMessage nameChangedMessage = new NameChangedMessage();
-        nameChangedMessage.setOldName(message.getOldName());
+        nameChangedMessage.setOldName(message.getPlayerId());
         nameChangedMessage.setNewName(message.getNewName());
-        nameChangedMessage.setType("user.nameChanged");
-        if (game == null) return nameChangedMessage;
-        if (game.getPlayer1().equals(message.getOldName())) game.setPlayer1(message.getNewName());
-        if (game.getPlayer2() != null && game.getPlayer2().equals(message.getOldName())) {
-            game.setPlayer2(message.getNewName());
-            nameChangedMessage.setPlayer2(true);
+
+        if (game == null) { 
+            messagingTemplate.convertAndSend(USER_ENDPOINT +  message.getPlayerId(), nameChangedMessage);
         }
-        if (game.getTurn().equals(message.getOldName())) {
-            game.setTurn(message.getNewName());
-            nameChangedMessage.setTurnChanged(true);
+        if (game.getPlayer1Id().equals(message.getPlayerId())) game.setPlayer1Name(message.getNewName());
+
+        if (game.getPlayer2Id() != null && game.getPlayer2Id().equals(message.getPlayerId())) {
+            game.setPlayer2Name(message.getNewName());
         }
 
+        messagingTemplate.convertAndSend(USER_ENDPOINT +  message.getPlayerId(), nameChangedMessage);
         return nameChangedMessage;
     }
 
-    @MessageMapping("/game.leave")
+    @MessageMapping("/leave")
     public void leaveGame(@Payload PlayerMessage message) {
-        TicTacToe game = ticTacToeManager.leaveGame(message.getPlayer());
+        Game game = ticTacToeManager.leaveGame(message.getPlayer());
+        String gameId = message.getGameId();
         if (game != null) {
-            TicTacToeMessage gameMessage = gameToMessage(game);
-            gameMessage.setType("game.left");
-            messagingTemplate.convertAndSend("/topic/game." + game.getGameId(), gameMessage);
+            GameMessage gameMessage = gameToMessage(game);
+            gameMessage.setType("left");
+            messagingTemplate.convertAndSend(GAME_ENDPOINT + gameId, gameMessage);
         }
     }
 
-    @MessageMapping("/game.move")
-    public void makeMove(@Payload TicTacToeMessage message) {
-        String player = message.getSender();
+    @MessageMapping("/move")
+    public void makeMove(@Payload MoveMessage message) {
+        String playerId = message.getPlayerId();
         String gameId = message.getGameId();
-        int move = message.getMove();
-        TicTacToe game = ticTacToeManager.getGame(gameId);
+        int move = message.getSquare();
+        Game game = ticTacToeManager.getGame(gameId);
 
         if (game == null || game.isGameOver()) {
-            TicTacToeMessage errorMessage = new TicTacToeMessage();
+            ErrorMessage errorMessage = new ErrorMessage();
             errorMessage.setType("error");
             errorMessage.setContent("Game not found or is already over.");
             this.messagingTemplate.convertAndSend(GAME_ENDPOINT + gameId, errorMessage);
             return;
         }
 
-        if (game.getGameState().equals(GameState.WAITING_FOR_PLAYER)) {
-            TicTacToeMessage errorMessage = new TicTacToeMessage();
+        if (game.getGameState().equals(GameState.PENDING)) {
+            ErrorMessage errorMessage = new ErrorMessage();
             errorMessage.setType("error");
             errorMessage.setContent("Game is waiting for another player to join.");
             this.messagingTemplate.convertAndSend(GAME_ENDPOINT + gameId, errorMessage);
             return;
         }
 
-        if (game.getTurn().equals(player)) {
-            game.makeMove(player, move);
+        if (game.getPlayer1Id().equals(playerId) ? game.isPlayer1Move() : !game.isPlayer1Move()) {
+            game.makeMove(playerId, move);
 
-            TicTacToeMessage gameStateMessage = new TicTacToeMessage(game);
-            gameStateMessage.setType("game.move");
+            GameMessage gameStateMessage = new GameMessage(game);
+            gameStateMessage.setType("move");
             this.messagingTemplate.convertAndSend(GAME_ENDPOINT + gameId, gameStateMessage);
 
             if (game.isGameOver()) {
-                TicTacToeMessage gameOverMessage = gameToMessage(game);
-                gameOverMessage.setType("game.gameOver");
+                GameMessage gameOverMessage = gameToMessage(game);
+                gameOverMessage.setType("gameOver");
                 this.messagingTemplate.convertAndSend(GAME_ENDPOINT + gameId, gameOverMessage);
                 ticTacToeManager.removeGame(gameId);
             }
@@ -138,47 +133,44 @@ public class MessageController {
 
     @EventListener
     public void SessionDisconnectEvent(SessionDisconnectEvent event) {
-        StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
-        if (headerAccessor.getSessionAttributes() == null) {
-            return;
-        }
-        String gameId = headerAccessor.getSessionAttributes().get("gameId").toString();
-        String player = headerAccessor.getSessionAttributes().get("player").toString();
-        TicTacToe game = ticTacToeManager.getGame(gameId);
-        if (game != null) {
-            if (game.getPlayer1().equals(player)) {
-                game.setPlayer1(null);
-                if (game.getPlayer2() != null) {
-                    game.setGameState(GameState.PLAYER2_WON);
-                    game.setWinner(game.getPlayer2());
-                } else {
-                    ticTacToeManager.removeGame(gameId);
-                }
-            } else if (game.getPlayer2() != null && game.getPlayer2().equals(player)) {
-                game.setPlayer2(null);
-                if (game.getPlayer1() != null) {
-                    game.setGameState(GameState.PLAYER1_WON);
-                    game.setWinner(game.getPlayer1());
-                } else {
-                    ticTacToeManager.removeGame(gameId);
-                }
-            }
-            TicTacToeMessage gameMessage = gameToMessage(game);
-            gameMessage.setType("game.gameOver");
-            messagingTemplate.convertAndSend(GAME_ENDPOINT + gameId, gameMessage);
-            ticTacToeManager.removeGame(gameId);
-        }
+        // StompHeaderAccessor headerAccessor = StompHeaderAccessor.wrap(event.getMessage());
+        // Map<String, Object> sessionAttributes = headerAccessor.getSessionAttributes();
+        // if (sessionAttributes.isEmpty()) {
+        //     return;
+        // }
+        // String gameId = headerAccessor.getFirstNativeHeader("gameId");
+        // String player = headerAccessor.getFirstNativeHeader("playerId");
+        // Game game = ticTacToeManager.getGame(gameId);
+        // if (game != null) {
+        //     if (game.getPlayer1Id().equals(player)) {
+        //         game.setPlayer1Id(null);
+        //         if (game.getPlayer2Id() != null) {
+        //             game.setGameState(GameState.PLAYER_2_WON);
+        //         } else {
+        //             ticTacToeManager.removeGame(gameId);
+        //         }
+        //     } else if (game.getPlayer2Id() != null && game.getPlayer2Id().equals(player)) {
+        //         game.setPlayer2Id(null);
+        //         if (game.getPlayer1Id() != null) {
+        //             game.setGameState(GameState.PLAYER_1_WON);
+        //         } else {
+        //             ticTacToeManager.removeGame(gameId);
+        //         }
+        //     }
+        //     GameMessage gameMessage = gameToMessage(game);
+        //     gameMessage.setType("gameOver");
+        //     messagingTemplate.convertAndSend(GAME_ENDPOINT + gameId, gameMessage);
+        //     ticTacToeManager.removeGame(gameId);
+        // }
     }
 
-    private TicTacToeMessage gameToMessage(TicTacToe game) {
-        TicTacToeMessage message = new TicTacToeMessage();
+    private GameMessage gameToMessage(Game game) {
+        GameMessage message = new GameMessage();
         message.setGameId(game.getGameId());
-        message.setPlayer1(game.getPlayer1());
-        message.setPlayer2(game.getPlayer2());
+        message.setPlayer1Id(game.getPlayer1Id());
+        message.setPlayer2Id(game.getPlayer2Id());
         message.setBoard(game.getBoard());
-        message.setTurn(game.getTurn());
         message.setGameState(game.getGameState());
-        message.setWinner(game.getWinner());
         return message;
     }
 }

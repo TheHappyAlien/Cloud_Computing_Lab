@@ -5,39 +5,48 @@ import tictactoe.app.enumeration.GameState;
 import java.util.Objects;
 import java.util.UUID;
 
-public class TicTacToe {
-    private String gameId;
+public class Game {
+    private String gameId = "";
     private String[] board;
-    private String player1;
-    private String player2;
-    private String winner;
-    private String turn;
+    private String player1Name = "";
+    private String player2Name = "";
+    private String player1Id = "";
+    private String player2Id = "";
+    private boolean player1Move = true;
+    public boolean isPlayer1Move() {
+        return player1Move;
+    }
+
+
+    public void setPlayer1Move(boolean player1Move) {
+        this.player1Move = player1Move;
+    }
+
+
     private GameState gameState;
 
-    public TicTacToe(String player1, String player2) {
+    public Game(String player1Id, String player2Id) {
         this.gameId = UUID.randomUUID().toString();
-        this.player1 = player1;
-        this.player2 = player2;
-        this.turn = player1;
+        this.player1Id = player1Id;
+        this.player2Id = player2Id;
         this.board = new String[9];
         for (int i = 0; i < 9; i++) {
-                this.board[i] = " ";
+            this.board[i] = "";
         }
-        gameState = GameState.WAITING_FOR_PLAYER;
+        gameState = GameState.PENDING;
     }
 
 
     public void makeMove(String player, int move) {
-        if (Objects.equals(board[move], " ")) {
-            board[move] = Objects.equals(player, player1) ? "X" : "O";
-            turn = player.equals(player1) ? player2 : player1;
-            checkWinner();
-            updateGameState();
+        if (Objects.equals(board[move], "")) {
+            board[move] = Objects.equals(player, player1Id) ? "X" : "O";
+            player1Move = !player1Move;
+            updateGame();
         }
     }
 
 
-    private static int[][] winningMoves = {
+    private static final int[][] winningMoves = {
             {0, 1, 2}, // Top row
             {3, 4, 5}, // Middle row
             {6, 7, 8}, // Bottom row
@@ -48,64 +57,29 @@ public class TicTacToe {
             {2, 4, 6}  // Diagonal from top-right to bottom-left
     };
 
-    private void checkWinner() {
-        for (int i = 0; i < 3; i++) {
-            if (Objects.equals(board[i], board[i]) && Objects.equals(board[i][0], board[i][2])) {
-                if (!Objects.equals(board[i][0], " ")) {
-                    setWinner(Objects.equals(board[i][0], player1) ? player1 : player2);
-                    return;
-                }
-            }
-        }
-
-        for (int i = 0; i < 3; i++) {
-            if (Objects.equals(board[0][i], board[1][i]) && Objects.equals(board[0][i], board[2][i])) {
-                if (!Objects.equals(board[0][i], " ")) {
-                    setWinner(Objects.equals(board[0][i], player1) ? player1 : player2);
-                    return;
-                }
-            }
-        }
-
-        if (Objects.equals(board[0][0], board[1][1]) && Objects.equals(board[0][0], board[2][2])) {
-            if (!Objects.equals(board[0][0], " ")) {
-                setWinner(Objects.equals(board[0][0], player1) ? player1 : player2);
+    private void updateGame() {
+        for (int[] moves: winningMoves) {
+            if (!board[moves[0]].isEmpty() && board[moves[0]].equals(board[moves[1]]) && board[moves[1]].equals(board[moves[2]])) {
+                gameState = board[moves[0]].equals("X") ? GameState.PLAYER_1_WON : GameState.PLAYER_2_WON;
                 return;
             }
         }
 
-        if (Objects.equals(board[0][2], board[1][1]) && Objects.equals(board[0][2], board[2][0])) {
-            if (!Objects.equals(board[0][2], " ")) {
-                setWinner(Objects.equals(board[0][2], player1) ? player1 : player2);
-                return;
+        boolean isFull = true;
+        for (int i = 0; i < 9; i++) {
+            if (board[i].isEmpty()) {
+                isFull = false;
+                break;
             }
+        }
+        if (isFull) {
+            gameState = GameState.DRAW;
         }
     }
 
-    private void updateGameState() {
-        if (winner != null) {
-            gameState = winner.equals(player1) ? GameState.PLAYER1_WON : GameState.PLAYER2_WON;
-        } else if (isBoardFull()) {
-            gameState = GameState.TIE;
-        } else {
-            gameState = turn.equals(player1) ? GameState.PLAYER1_TURN : GameState.PLAYER2_TURN;
-        }
-    }
-    private boolean isBoardFull() {
-        for (int i = 0; i < 3; i++) {
-            for (int j = 0; j < 3; j++) {
-                if (Objects.equals(board[i][j], " ")) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
     public boolean isGameOver() {
-        return winner != null || isBoardFull();
+        return gameState == GameState.DRAW || gameState == GameState.PLAYER_1_WON || gameState == GameState.PLAYER_2_WON;
     }
-
-
 
     public String getGameId() {
         return gameId;
@@ -115,44 +89,28 @@ public class TicTacToe {
         this.gameId = gameId;
     }
 
-    public String[][] getBoard() {
+    public String[] getBoard() {
         return board;
     }
 
-    public void setBoard(String[][] board) {
+    public void setBoard(String[] board) {
         this.board = board;
     }
 
-    public String getPlayer1() {
-        return player1;
+    public String getPlayer1Id() {
+        return player1Id;
     }
 
-    public void setPlayer1(String player1) {
-        this.player1 = player1;
+    public void setPlayer1Id(String player1Id) {
+        this.player1Id = player1Id;
     }
 
-    public String getPlayer2() {
-        return player2;
+    public String getPlayer2Id() {
+        return player2Id;
     }
 
-    public void setPlayer2(String player2) {
-        this.player2 = player2;
-    }
-
-    public String getWinner() {
-        return winner;
-    }
-
-    public void setWinner(String winner) {
-        this.winner = winner;
-    }
-
-    public String getTurn() {
-        return turn;
-    }
-
-    public void setTurn(String turn) {
-        this.turn = turn;
+    public void setPlayer2Id(String player2Id) {
+        this.player2Id = player2Id;
     }
 
     public GameState getGameState() {
@@ -161,6 +119,22 @@ public class TicTacToe {
 
     public void setGameState(GameState gameState) {
         this.gameState = gameState;
+    }
+
+    public String getPlayer1Name() {
+        return player1Name;
+    }
+
+    public void setPlayer1Name(String player1Name) {
+        this.player1Name = player1Name;
+    }
+
+    public String getPlayer2Name() {
+        return player2Name;
+    }
+
+    public void setPlayer2Name(String player2Name) {
+        this.player2Name = player2Name;
     }
 }
 

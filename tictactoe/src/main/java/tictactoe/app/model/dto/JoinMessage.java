@@ -1,12 +1,11 @@
 package tictactoe.app.model.dto;
 
-public class JoinMessage implements Message {
+public class JoinMessage implements Message{
     private String type;
     private String gameId;
-    private String player;
-    private String content;
+    private String playerId;
 
-    @Override
+
     public String getType() {
         return type;
     }
@@ -15,29 +14,19 @@ public class JoinMessage implements Message {
         this.type = type;
     }
 
-    @Override
     public String getGameId() {
         return gameId;
-    }
-
-    @Override
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
     }
 
     public void setGameId(String gameId) {
         this.gameId = gameId;
     }
 
-    public String getPlayer() {
-        return player;
+    public String getPlayerId() {
+        return playerId;
     }
 
-    public void setPlayer(String player) {
-        this.player = player;
+    public void setPlayerId(String player) {
+        this.playerId = player;
     }
 }

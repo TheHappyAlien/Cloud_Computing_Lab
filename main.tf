@@ -19,15 +19,6 @@ resource "aws_instance" "app_server" {
   subnet_id                   = aws_subnet.app_subnet.id
   security_groups             = [aws_security_group.app_sg.id]
   
-  
-  user_data = <<-EOF
-    #!/bin/bash
-    set -ex
-    sudo apt-get update -y
-    sudo apt-get upgrade -y
-    sudo apt-get install docker-compose -y
-  EOF
-  
   key_name                    = "ssh-key"
   associate_public_ip_address = true
   

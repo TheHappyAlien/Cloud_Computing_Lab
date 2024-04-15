@@ -4,7 +4,6 @@ public class PlayerMessage implements Message {
     private String type;
     private String gameId;
     private String player;
-    private String content;
 
     @Override
     public String getType() {
@@ -15,7 +14,6 @@ public class PlayerMessage implements Message {
         this.type = type;
     }
 
-    @Override
     public String getGameId() {
         return gameId;
     }
@@ -30,14 +28,5 @@ public class PlayerMessage implements Message {
 
     public void setPlayer(String player) {
         this.player = player;
-    }
-
-    @Override
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
     }
 }

@@ -51,18 +51,12 @@ public class NameChangedMessage implements Message{
         this.oldName = oldName;
     }
 
-    @Override
     public String getType() {
         return type;
     }
 
-    @Override
-    public String getGameId() {
-        return null;
-    }
 
-    @Override
-    public String getContent() {
+    public String getGameId() {
         return null;
     }
 

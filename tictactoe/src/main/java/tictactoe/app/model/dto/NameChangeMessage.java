@@ -1,26 +1,26 @@
 package tictactoe.app.model.dto;
 public class NameChangeMessage {
-    private String oldName;
+    private String playerId;
     private String newName;
 
     public NameChangeMessage() {
     }
 
-    public NameChangeMessage(String oldName, String newName) {
-        this.oldName = oldName;
+    public NameChangeMessage(String playerId, String newName) {
+        this.playerId = playerId;
         this.newName = newName;
     }
 
-    public String getOldName() {
-        return oldName;
+    public String getPlayerId() {
+        return playerId;
     }
 
     public String getNewName() {
         return newName;
     }
 
-    public void setOldName(String oldName) {
-        this.oldName = oldName;
+    public void setPlayerId(String playerId) {
+        this.playerId = playerId;
     }
 
     public void setNewName(String newName) {

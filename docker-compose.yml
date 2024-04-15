@@ -1,23 +1,29 @@
-version: '3.1.1'
+version: '3'
 services:
   web:
-    build: tictactoe-frontend/
+    build: client/
     ports:
-      - "81:80"
+      - "81:81"
+    networks:
+      - my_network
+    container_name: web       
 
   app:
     build: tictactoe/
-    ports:
-      - "8080:8080"
-
+    # ports:
+    #   - "8080:8080"
+    networks:
+      - my_network
+    container_name: app
 
 # networks:
-#   frontend_network:
-#     driver: bridge
-#   backend_network:
-#     driver: bridge
+#   chmura_int:
 #     internal: true
-#     ipam:
-#       config:
-#         - subnet: 10.5.0.0/16
-#           gateway: 10.5.0.1
+#     name: chmura_int
+#   chmura_ext:
+#     internal: false
+#     name: chmura_ext
+
+networks:
+  my_network:
+    driver: bridge

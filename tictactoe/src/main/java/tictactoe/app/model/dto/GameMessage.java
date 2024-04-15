@@ -3,28 +3,23 @@ package tictactoe.app.model.dto;
 import tictactoe.app.enumeration.GameState;
 import tictactoe.app.model.Game;
 
-public class TicTacToeMessage implements Message {
+public class GameMessage implements Message{
     private String type;
     private String gameId;
-    private String player1;
-    private String player2;
-    private String winner;
-    private String turn;
-    private String content;
-    private String[][] board;
-    private int move;
-    private String sender;
+    private String player1Name;
+    private String player2Name;
+    private String player1Id;
+    private String player2Id;
+    private String[] board;
 
     private GameState gameState;
 
-    public TicTacToeMessage() {}
+    public GameMessage() {}
 
-    public TicTacToeMessage(Game game) {
+    public GameMessage(Game game) {
         this.gameId = game.getGameId();
-        this.player1 = game.getPlayer1();
-        this.player2 = game.getPlayer2();
-        this.winner = game.getWinner();
-        this.turn = game.getTurn();
+        this.player1Id = game.getPlayer1Id();
+        this.player2Id = game.getPlayer2Id();
         this.board = game.getBoard();
         this.gameState = game.getGameState();
     }
@@ -48,60 +43,28 @@ public class TicTacToeMessage implements Message {
         this.gameId = gameId;
     }
 
-    public String getPlayer1() {
-        return player1;
+    public String getPlayer1Id() {
+        return player1Id;
     }
 
-    public void setPlayer1(String player1) {
-        this.player1 = player1;
+    public void setPlayer1Id(String player1) {
+        this.player1Id = player1;
     }
 
-    public String getPlayer2() {
-        return player2;
+    public String getPlayer2Id() {
+        return player2Id;
     }
 
-    public void setPlayer2(String player2) {
-        this.player2 = player2;
+    public void setPlayer2Id(String player2) {
+        this.player2Id = player2;
     }
 
-    public String getWinner() {
-        return winner;
-    }
-
-    public void setWinner(String winner) {
-        this.winner = winner;
-    }
-
-    public String getTurn() {
-        return turn;
-    }
-
-    public void setTurn(String turn) {
-        this.turn = turn;
-    }
-
-    public String[][] getBoard() {
+    public String[] getBoard() {
         return board;
     }
 
-    public void setBoard(String[][] board) {
+    public void setBoard(String[] board) {
         this.board = board;
-    }
-
-    public int getMove() {
-        return move;
-    }
-
-    public void setMove(int move) {
-        this.move = move;
-    }
-
-    public String getContent() {
-        return content;
-    }
-
-    public void setContent(String content) {
-        this.content = content;
     }
 
     public GameState getGameState() {
@@ -112,11 +75,19 @@ public class TicTacToeMessage implements Message {
         this.gameState = gameState;
     }
 
-    public String getSender() {
-        return sender;
+    public String getPlayer1Name() {
+        return player1Name;
     }
 
-    public void setSender(String sender) {
-        this.sender = sender;
+    public void setPlayer1Name(String player1Name) {
+        this.player1Name = player1Name;
+    }
+
+    public String getPlayer2Name() {
+        return player2Name;
+    }
+
+    public void setPlayer2Name(String player2Name) {
+        this.player2Name = player2Name;
     }
 }

@@ -8,5 +8,4 @@ RUN mvn package -DskipTests
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /tictactoe
 COPY --from=build /tictactoe/target/tictactoe-0.0.1-SNAPSHOT.jar ./tictactoe.jar
-EXPOSE 8080
 ENTRYPOINT ["java", "-jar", "tictactoe.jar"]
