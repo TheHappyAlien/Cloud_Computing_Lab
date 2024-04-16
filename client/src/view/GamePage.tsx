@@ -35,7 +35,7 @@ export default function GamePage() {
 
   return (
     <div className="flex">
-      <div className="w-1/4 mx-3 h-screen pt-10 space-y-2 flex flex-col p-5 bg-gradient-to-l from-gray-400 to-white">
+      <div className="w-1/4 mx-3 h-screen pt-10 space-y-2 flex flex-col p-5 gray-400">
         {/* <Button
           className="w-full"
           onClick={() => connect(user.id)}

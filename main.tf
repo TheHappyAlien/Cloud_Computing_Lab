@@ -9,16 +9,19 @@ terraform {
   required_version = ">= 1.2.0"
 }
 
+# Specifies that the provider will be aws
 provider "aws" {
   region  = "us-east-1"
 }
 
+# Launching a t2.small ec2 instance with ubuntu
 resource "aws_instance" "app_server" {
   ami           = "ami-080e1f13689e07408"
-  instance_type = "t2.micro"
+  instance_type = "t2.small"
   subnet_id                   = aws_subnet.app_subnet.id
   security_groups             = [aws_security_group.app_sg.id]
   
+  # Specifies the ssh key pair used to connect to the instance
   key_name                    = "ssh-key"
   associate_public_ip_address = true
   
