@@ -9,6 +9,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 
 import tictactoe.app.enumeration.GameState;
+import tictactoe.app.manager.AuthManager;
 import tictactoe.app.manager.TicTacToeManager;
 import tictactoe.app.model.Game;
 import tictactoe.app.model.dto.ErrorMessage;
@@ -16,6 +17,7 @@ import tictactoe.app.model.dto.GameMessage;
 import tictactoe.app.model.dto.MoveMessage;
 import tictactoe.app.model.dto.NameChangeMessage;
 import tictactoe.app.model.dto.NameChangedMessage;
+import tictactoe.app.model.dto.PlayerAuthMessage;
 import tictactoe.app.model.dto.PlayerMessage;
 
 @Controller
@@ -30,7 +32,13 @@ public class MessageController {
     private final String USER_ENDPOINT = "/user";
 
     @MessageMapping("/join")
-    public void joinGame(@Payload String playerId) {
+    public void joinGame(@Payload PlayerAuthMessage player) {
+        
+        if (!AuthManager.UserAuthorized(player.getAuthToken())) {
+            return;
+        }
+
+        String playerId = player.getPlayerId();
         Game game = ticTacToeManager.joinGame(playerId);
         if (game == null || game.getPlayer1Id() == null) {
             ErrorMessage errorMessage = new ErrorMessage();

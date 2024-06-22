@@ -1,0 +1,8 @@
+docker build -t thehappyalien/tictactoe-web:latest ../client/
+
+docker push thehappyalien/tictactoe-web:latest
+
+
+docker build -t thehappyalien/tictactoe-app:latest ../tictactoe/
+
+docker push thehappyalien/tictactoe-app:latest

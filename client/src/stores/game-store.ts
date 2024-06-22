@@ -9,6 +9,7 @@ import { createJSONStorage, persist } from "zustand/middleware";
 // import { GameStatus } from "../utils/enums";
 import { Client } from '@stomp/stompjs';
 import Game from "./interface/game.interface";
+import JoinGameDto from "./dto/join-game.dto";
 // import { subscribe } from "diagnostics_channel";
 
 function convertJsonToGame(json: any): Game {
@@ -29,15 +30,11 @@ function convertJsonToGame(json: any): Game {
   };
 }
 
-const currentUrl = window.location.href;
-const wsUrl = currentUrl.replace(/^http/, 'ws').replace(/\/[^/]*$/, '/ws');
-console.log(wsUrl); // Output: ws://{frontend-ip}:81/ws
 
 const client = new Client( {
-    // brokerURL: "ws://localhost:8080/ws"
-    brokerURL: wsUrl
+    // brokerURL: "ws://localhost:81/ws"
+    brokerURL: "ws://52.206.237.240:80/ws"
 });
-
 
 
 client.onDisconnect = function (frame: any) {
@@ -47,7 +44,7 @@ client.onDisconnect = function (frame: any) {
 export interface GameStore {
   connect: (userId: string) => void;
   disconnect: () => void;
-  joinGame: (playerId: string) => void;
+  joinGame: (joinGameDto: JoinGameDto) => void;
   game?: Game;
   makeMove: (makeMoveDto: MakeMoveDto) => void;
 }
@@ -92,17 +89,18 @@ export const useGamesStore = create<GameStore>()(
           }
         )
       };
+      
       client.activate()
 
     },
     disconnect: () => {
       client.deactivate()
     },
-    joinGame: (playerId: string) => {
-
+    joinGame: (message: JoinGameDto) => {
+      // console.log("join game", message.playerId, message.authToken)
       client.publish({
         destination: '/app/join',
-        body: playerId
+        body: JSON.stringify(message)
       })
     },
     makeMove: (message: MakeMoveDto) => {

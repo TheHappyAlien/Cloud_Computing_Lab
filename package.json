@@ -1,0 +1,5 @@
+{
+  "devDependencies": {
+    "amazon-cognito-identity-js": "^6.3.12"
+  }
+}

@@ -12,6 +12,7 @@ export default defineConfig({
     proxy: {
       '/ws': {
         target: 'ws://app:8080',
+        // target: 'ws://localhost:8080',
         ws: true,
         changeOrigin: true,
         secure: false

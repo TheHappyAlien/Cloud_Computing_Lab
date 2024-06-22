@@ -1,6 +1,7 @@
 import { Navigate, createBrowserRouter } from "react-router-dom";
 import LoginPage from "../view/LoginPage";
 import GamePage from "../view/GamePage";
+import RegisterPage from "../view/RegisterPage";
 
 export const router = createBrowserRouter([
   {
@@ -10,6 +11,10 @@ export const router = createBrowserRouter([
   {
     path: "/game",
     element: <GamePage />,
+  },
+  {
+    path: "/register",
+    element: <RegisterPage />,
   },
   {
     path: "*",

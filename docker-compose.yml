@@ -10,19 +10,9 @@ services:
 
   app:
     build: tictactoe/
-    # ports:
-    #   - "8080:8080"
     networks:
       - my_network
     container_name: app
-
-# networks:
-#   chmura_int:
-#     internal: true
-#     name: chmura_int
-#   chmura_ext:
-#     internal: false
-#     name: chmura_ext
 
 networks:
   my_network:

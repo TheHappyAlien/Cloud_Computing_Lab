@@ -27,7 +27,7 @@ export default function GamePage() {
 
   useEffect(() => {
     console.log({ user });
-    connect(user.id);
+    connect(user?.email || "");
     return () => {
       disconnect();
     };
@@ -48,13 +48,13 @@ export default function GamePage() {
         >
           Disconnect
         </Button> */}
-      <WelcomeText user={user.name} />
-      <Button onClick={() => joinGame(user.name)}>Join</Button>
+      <WelcomeText user={user?.email || ""} />
+      <Button onClick={() => joinGame({playerId: user?.email || "", authToken: user?.accessToken || ""})}>Join</Button>
       </div>
 
       <div className="flex flex-col flex-1">
         <div className="grid grid-cols-3 ms-8 mt-8 gap-8">
-          {game === undefined ? (
+          {game === undefined || game === null ? (
             <Label>No games in progress</Label>
           ) : game.status === GameStatus.PENDING ? (
             <Label>Waiting for opponent</Label>
@@ -62,9 +62,9 @@ export default function GamePage() {
               <div>
                 <TicTacToe
                   game={game}
-                  player={user.name!}
+                  player={user?.email!}
                   makeMove={(position: number) =>
-                    makeMove({ gameId: game.id, square: position, playerId: user.id })
+                    makeMove({ gameId: game.id, square: position, playerId: user?.email! })
                   }
                 />
               </div>
